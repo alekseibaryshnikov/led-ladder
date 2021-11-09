@@ -3,9 +3,9 @@ var ledController = require("neopixel");
 // Light detector
 var lightSensor = require("@amperka/light-sensor").connect(A0);
 // Amount of steps
-var steps = 3;
+var steps = 16;
 // Amount of leds on a step
-var ledsOnStep = 1;
+var ledsOnStep = 18;
 // All leds array
 var ledsArray = new Uint8ClampedArray(ledsOnStep * steps * 3);
 // Delay between steps lighting
@@ -26,12 +26,29 @@ var lxLimit = 50;
 // Clear leds
 ledController.write(A7, ledsArray);
 
+function lightStep(currentIdx, color) {
+    var i = 0;
+    for (var i = 0; i < ledsOnStep; i++) {
+        ledsArray[currentIdx++] = color.r;
+        ledsArray[currentIdx++] = color.g;
+        ledsArray[currentIdx++] = color.b;
+    }
+    return currentIdx;
+}
+
+function reverseLightStep(currentIdx, color) {
+    for (var i = 0; i < ledsOnStep; i++) {
+        ledsArray[currentIdx--] = color.b;
+        ledsArray[currentIdx--] = color.g;
+        ledsArray[currentIdx--] = color.r;
+    }
+    return currentIdx;
+}
+
 function lightStairTopToBottom(color) {
     var i = 0;
     var interval = setInterval(function () {
-        ledsArray[i++] = color.r;
-        ledsArray[i++] = color.g;
-        ledsArray[i++] = color.b;
+        i = lightStep(i, color);
         ledController.write(A7, ledsArray);
         if (i >= ledsArray.length - 1) {
             clearInterval(interval);
@@ -42,9 +59,7 @@ function lightStairTopToBottom(color) {
 function lightStairBottomToTop(color) {
     var i = ledsArray.length - 1;
     var interval = setInterval(function () {
-        ledsArray[i--] = color.b;
-        ledsArray[i--] = color.g;
-        ledsArray[i--] = color.r;
+        i = reverseLightStep(i, color);
         ledController.write(A7, ledsArray);
         if (i <= 0) {
             clearInterval(interval);
@@ -88,7 +103,7 @@ setWatch(function () {
             lightStairBottomToTop(yellowColor);
             lightSwitch = setTimeout(function () {
                 lightStairBottomToTop(blackColor);
-            }, 20000);
+            }, 60000);
         } else {
             lightStairTopToBottom(blackColor);
             if (lightSwitch) {
