@@ -27,7 +27,6 @@ var lxLimit = 50;
 ledController.write(A7, ledsArray);
 
 function lightStep(currentIdx, color) {
-    var i = 0;
     for (var i = 0; i < ledsOnStep; i++) {
         ledsArray[currentIdx++] = color.r;
         ledsArray[currentIdx++] = color.g;
